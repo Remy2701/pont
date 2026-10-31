@@ -1,0 +1,15 @@
+name = "pont"
+version = "1.0.0"
+
+description = "A two-way serializer with type description."
+licences = ["Apache-2.0"]
+repository = { type = "github", user = "Remy2701", repo = "pont" }
+
+[dependencies]
+gleam_stdlib = ">= 1.0.0 and < 2.0.0"
+gleam_time = ">= 1.11.0 and < 2.0.0"
+gleam_json = ">= 3.1.0 and < 4.0.0"
+taffy = ">= 1.1.2 and < 2.0.0"
+
+[dev_dependencies]
+gleeunit = ">= 1.0.0 and < 2.0.0"

@@ -1,5 +1,5 @@
 name = "pont"
-version = "1.1.0"
+version = "1.2.0"
 
 description = "A two-way serializer with type description."
 licences = ["Apache-2.0"]

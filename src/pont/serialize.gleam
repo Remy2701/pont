@@ -455,6 +455,21 @@ pub fn build(context: Context(t), value: t) -> RawDecoder(#(Context(t), t)) {
 }
 
 // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– //
+//                                           Modifiers                                           //
+// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– //
+
+pub fn with_default(
+  serializer: Serializer(a),
+  default: value.Value,
+) -> Serializer(a) {
+  Serializer(
+    decoder: serializer.decoder,
+    encoder: serializer.encoder,
+    spec: spec.with_default(serializer.spec, default),
+  )
+}
+
+// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– //
 //                                       Encoder & Decoder                                       //
 // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– //
 

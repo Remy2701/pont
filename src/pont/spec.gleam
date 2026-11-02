@@ -161,3 +161,17 @@ pub fn with_format(spec: Spec, format: Format) -> Spec {
     Union(..) -> Union(..spec, format: Some(format))
   }
 }
+
+pub fn with_default(spec: Spec, default: value.Value) -> Spec {
+  case spec {
+    String(..) -> String(..spec, default: Some(default))
+    Integer(..) -> Integer(..spec, default: Some(default))
+    Float(..) -> Float(..spec, default: Some(default))
+    Boolean(..) -> Boolean(..spec, default: Some(default))
+    Null(..) -> Null(..spec, default: Some(default))
+    Array(..) -> Array(..spec, default: Some(default))
+    Option(..) -> Option(..spec, default: Some(default))
+    Object(..) -> Object(..spec, default: Some(default))
+    Union(..) -> Union(..spec, default: Some(default))
+  }
+}

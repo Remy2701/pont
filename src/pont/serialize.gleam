@@ -14,6 +14,7 @@ import gleam/time/calendar
 import gleam/time/timestamp.{type Timestamp}
 import pont/spec
 import pont/value
+import taffy as yaml
 import taffy/value.{type YamlValue as Yaml} as _yaml
 
 pub type RawDecoder(a) =
@@ -465,23 +466,72 @@ pub fn encoder(serializer: Serializer(t)) -> Encoder(t) {
   Encoder(encoder: serializer.encoder, spec: serializer.spec)
 }
 
+pub fn decode_with_decoder(
+  value: dynamic.Dynamic,
+  decoder: Decoder(t),
+) -> Result(t, List(decode.DecodeError)) {
+  decode.run(value, decoder.decoder)
+}
+
 pub fn decode(
   value: dynamic.Dynamic,
   serializer: Serializer(t),
 ) -> Result(t, List(decode.DecodeError)) {
-  decode.run(value, serializer.decoder)
+  decode_with_decoder(value, decoder(serializer))
+}
+
+pub fn decode_json_with_decoder(
+  json: String,
+  decoder: Decoder(t),
+) -> Result(t, json.DecodeError) {
+  json.parse(json, decoder.decoder)
+}
+
+pub fn decode_json(
+  json: String,
+  serializer: Serializer(t),
+) -> Result(t, json.DecodeError) {
+  decode_json_with_decoder(json, decoder(serializer))
+}
+
+pub fn decode_yaml_with_decoder(
+  yaml: String,
+  decoder: Decoder(t),
+) -> Result(t, yaml.YamlDecodeError) {
+  yaml.decode(yaml, decoder.decoder)
+}
+
+pub fn decode_yaml(
+  yaml: String,
+  serializer: Serializer(t),
+) -> Result(t, yaml.YamlDecodeError) {
+  decode_yaml_with_decoder(yaml, decoder(serializer))
+}
+
+pub fn encode_with_encoder(value: t, of encoder: Encoder(t)) -> value.Value {
+  encoder.encoder(value)
 }
 
 pub fn encode(value: t, of serializer: Serializer(t)) -> value.Value {
-  serializer.encoder(value)
+  encode_with_encoder(value, encoder(serializer))
+}
+
+/// Directly encode a value using the given encoder to JSON.
+pub fn encode_json_with_encoder(a: a, of encoder: Encoder(a)) -> Json {
+  value.to_json(encode_with_encoder(a, of: encoder))
 }
 
 /// Directly encode a value using the given serializer to JSON.
 pub fn encode_json(a: a, of serializer: Serializer(a)) -> Json {
-  value.to_json(encode(a, of: serializer))
+  encode_json_with_encoder(a, of: encoder(serializer))
+}
+
+/// Directly encode a value using the given encoder to JSON.
+pub fn encode_yaml_with_encoder(a: a, of encoder: Encoder(a)) -> Yaml {
+  value.to_yaml(encode_with_encoder(a, of: encoder))
 }
 
 /// Directly encode a value using the given serializer to JSON.
 pub fn encode_yaml(a: a, of serializer: Serializer(a)) -> Yaml {
-  value.to_yaml(encode(a, of: serializer))
+  encode_yaml_with_encoder(a, of: encoder(serializer))
 }

@@ -8,6 +8,7 @@ import gleam/time/timestamp
 import pont/serialize
 import pont/spec
 import pont/value
+import taffy
 import taffy/value as yaml_value
 
 pub fn serialize_string_decode_test() {
@@ -391,7 +392,7 @@ pub fn serialize_timestamp_decode_test() {
     |> serialize.decode(serialize.timestamp())
 
   let assert Ok(decoded) = result
-  let assert True = decoded == timestamp.from_unix_seconds(1_234_567_890)
+  assert decoded == timestamp.from_unix_seconds(1_234_567_890)
 }
 
 pub fn serialize_timestamp_decode_invalid_test() {
@@ -524,8 +525,7 @@ pub fn serialize_object_encode_test() {
     Person(name: "Alice", age: 30, is_student: True)
     |> serialize.encode(person_serializer())
 
-  let assert True =
-    result
+  assert result
     == value.Object([
       #("name", value.String("Alice")),
       #("age", value.Integer(30)),
@@ -536,13 +536,40 @@ pub fn serialize_object_encode_test() {
 pub fn serialize_object_spec_test() {
   let result = person_serializer().spec
 
-  let assert True =
-    result
+  assert result
     == spec.object([
       spec.ObjectField(name: "name", spec: spec.string(), required: True),
       spec.ObjectField(name: "age", spec: spec.int(), required: True),
       spec.ObjectField(name: "is_student", spec: spec.bool(), required: True),
     ])
+}
+
+pub fn serialize_object_json_round_trip_test() {
+  let person = Person(name: "Alice", age: 30, is_student: True)
+
+  let encoded =
+    person
+    |> serialize.encode_json(person_serializer())
+    |> json.to_string
+
+  let assert "{\"name\":\"Alice\",\"age\":30,\"is_student\":true}" = encoded
+
+  let assert Ok(decoded) = serialize.decode_json(encoded, person_serializer())
+
+  assert decoded == person
+}
+
+pub fn serialize_object_yaml_round_trip_test() {
+  let person = Person(name: "Alice", age: 30, is_student: True)
+
+  let encoded =
+    person
+    |> serialize.encode_yaml(person_serializer())
+    |> taffy.to_yaml
+
+  let assert Ok(decoded) = serialize.decode_yaml(encoded, person_serializer())
+
+  assert decoded == person
 }
 
 fn person_with_optional_serializer() -> serialize.Serializer(Person) {
@@ -597,8 +624,7 @@ pub fn serialize_optional_field_decode_missing_uses_default_test() {
 pub fn serialize_optional_field_spec_test() {
   let result = person_with_optional_serializer().spec
 
-  let assert True =
-    result
+  assert result
     == spec.object([
       spec.ObjectField(name: "name", spec: spec.string(), required: True),
       spec.ObjectField(name: "age", spec: spec.int(), required: True),
@@ -646,8 +672,7 @@ pub fn serialize_indexed_field_encode_test() {
     ["a", "b", "c"]
     |> serialize.encode(indexed_strings_serializer())
 
-  let assert True =
-    result
+  assert result
     == value.Object([
       #("item[0]", value.String("a")),
       #("item[1]", value.String("b")),
@@ -658,8 +683,7 @@ pub fn serialize_indexed_field_encode_test() {
 pub fn serialize_indexed_field_spec_test() {
   let result = indexed_strings_serializer().spec
 
-  let assert True =
-    result
+  assert result
     == spec.object([
       spec.ObjectField(name: "item[0]", spec: spec.string(), required: True),
       spec.ObjectField(name: "item[1]", spec: spec.string(), required: True),
@@ -701,8 +725,7 @@ pub fn serialize_optional_indexed_field_decode_missing_uses_default_test() {
 pub fn serialize_optional_indexed_field_spec_test() {
   let result = optional_indexed_strings_serializer().spec
 
-  let assert True =
-    result
+  assert result
     == spec.object([
       spec.ObjectField(name: "item[0]", spec: spec.string(), required: False),
       spec.ObjectField(name: "item[1]", spec: spec.string(), required: False),
